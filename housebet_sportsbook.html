@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Housebet - Sportsbook Prototype</title>
+    <!-- Tailwind CSS untuk styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome untuk icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            DEFAULT: '#84cc16', // lime-500
+                            dark: '#65a30d',    // lime-600
+                            light: '#a3e635',   // lime-400
+                        },
+                        dark: {
+                            900: '#0f172a', // slate-900
+                            800: '#1e293b', // slate-800
+                            700: '#334155', // slate-700
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Transisi halus untuk tab */
+        .page-content {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Hilangkan scrollbar horizontal */
+        body { overflow-x: hidden; }
+    </style>
+</head>
+<body class="bg-dark-900 text-gray-200 font-sans min-h-screen flex flex-col">
+
+    <!-- Header & Navigasi -->
+    <header class="bg-dark-800 border-b border-gray-700 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center cursor-pointer" onclick="showPage('beranda')">
+                    <i class="fa-solid fa-bolt text-brand text-2xl mr-2"></i>
+                    <span class="font-extrabold text-2xl text-white tracking-wider">HOUSE<span class="text-brand">BET</span></span>
+                </div>
+                
+                <!-- Navigasi Desktop -->
+                <nav class="hidden md:flex space-x-8 h-full items-center">
+                    <button id="nav-beranda" onclick="showPage('beranda')" class="nav-link text-brand border-b-2 border-brand font-semibold hover:text-brand transition-colors h-full px-1 flex items-center">
+                        <i class="fa-solid fa-house mr-2"></i> Beranda
+                    </button>
+                    <button id="nav-live" onclick="showPage('live')" class="nav-link text-gray-400 border-b-2 border-transparent hover:text-white transition-colors h-full px-1 flex items-center">
+                        <i class="fa-solid fa-fire mr-2"></i> Live Sports
+                    </button>
+                    <button id="nav-esports" onclick="showPage('esports')" class="nav-link text-gray-400 border-b-2 border-transparent hover:text-white transition-colors h-full px-1 flex items-center">
+                        <i class="fa-solid fa-gamepad mr-2"></i> E-Sports
+                    </button>
+                    <button id="nav-promosi" onclick="showPage('promosi')" class="nav-link text-gray-400 border-b-2 border-transparent hover:text-white transition-colors h-full px-1 flex items-center">
+                        <i class="fa-solid fa-gift mr-2"></i> Promosi
+                    </button>
+                    <button id="nav-akun" onclick="showPage('akun')" class="nav-link text-gray-400 border-b-2 border-transparent hover:text-white transition-colors h-full px-1 flex items-center">
+                        <i class="fa-solid fa-user mr-2"></i> Akun
+                    </button>
+                </nav>
+
+                <!-- User Info/Saldo (Mock) -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <div class="text-sm bg-dark-700 px-3 py-1 rounded-full border border-gray-600">
+                        <span class="text-gray-400">Saldo:</span> 
+                        <span class="font-bold text-brand">Rp 2.500.000</span>
+                    </div>
+                    <button class="bg-brand hover:bg-brand-dark text-dark-900 font-bold py-1.5 px-4 rounded transition-colors text-sm">
+                        Deposit
+                    </button>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="text-gray-400 hover:text-white focus:outline-none">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation (Hidden by default) -->
+        <div id="mobile-menu" class="hidden md:hidden bg-dark-800 border-b border-gray-700">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <button onclick="showPage('beranda'); toggleMobileMenu();" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-white bg-dark-700">Beranda</button>
+                <button onclick="showPage('live'); toggleMobileMenu();" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-dark-700">Live Sports</button>
+                <button onclick="showPage('esports'); toggleMobileMenu();" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-dark-700">E-Sports</button>
+                <button onclick="showPage('promosi'); toggleMobileMenu();" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-dark-700">Promosi</button>
+                <button onclick="showPage('akun'); toggleMobileMenu();" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-dark-700">Akun</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- ========================================== -->
+        <!-- HALAMAN 1: BERANDA (FULL CONTENT)          -->
+        <!-- ========================================== -->
+        <section id="page-beranda" class="page-content block">
+            
+            <!-- Hero Banner -->
+            <div class="relative bg-gradient-to-r from-dark-800 to-dark-700 rounded-2xl overflow-hidden mb-8 shadow-lg border border-gray-700">
+                <div class="absolute inset-0 bg-black opacity-40"></div>
+                <div class="relative z-10 p-8 md:p-12 flex flex-col md:flex-row items-center justify-between">
+                    <div class="mb-6 md:mb-0">
+                        <span class="inline-block py-1 px-3 rounded-full bg-brand-dark/30 text-brand border border-brand/50 text-sm font-semibold mb-3">
+                            Bonus New Member 100%
+                        </span>
+                        <h1 class="text-3xl md:text-5xl font-extrabold text-white mb-4 leading-tight">
+                            Taruhan Olahraga <br>Terbaik & Terpercaya
+                        </h1>
+                        <p class="text-gray-300 max-w-lg mb-6 text-lg">
+                            Nikmati odds terbaik di ribuan pertandingan live setiap harinya. Mainkan di Housebet sekarang.
+                        </p>
+                        <button class="bg-brand hover:bg-brand-light text-dark-900 font-bold py-3 px-8 rounded-lg shadow-lg shadow-brand/30 transition-all transform hover:-translate-y-1">
+                            Pasang Taruhan Sekarang
+                        </button>
+                    </div>
+                    <div class="hidden md:block w-48 h-48 opacity-80">
+                        <!-- Placeholder ilustrasi olahraga pakai fontawesome raksasa -->
+                        <i class="fa-regular fa-futbol text-[120px] text-gray-500 transform rotate-12"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col lg:flex-row gap-8">
+                <!-- Kiri: Daftar Olahraga -->
+                <aside class="w-full lg:w-1/4">
+                    <div class="bg-dark-800 rounded-xl p-4 border border-gray-700 sticky top-24">
+                        <h3 class="text-white font-bold text-lg mb-4 pb-2 border-b border-gray-700">Cabang Olahraga</h3>
+                        <ul class="space-y-1">
+                            <li><a href="#" class="flex items-center justify-between p-2 rounded hover:bg-dark-700 text-brand bg-dark-700/50 transition"><div class="flex items-center"><i class="fa-regular fa-futbol w-6 text-center mr-2"></i> Sepak Bola</div><span class="text-xs bg-dark-900 px-2 py-1 rounded">1,245</span></a></li>
+                            <li><a href="#" class="flex items-center justify-between p-2 rounded hover:bg-dark-700 text-gray-400 hover:text-white transition"><div class="flex items-center"><i class="fa-solid fa-basketball w-6 text-center mr-2"></i> Bola Basket</div><span class="text-xs bg-dark-900 px-2 py-1 rounded">132</span></a></li>
+                            <li><a href="#" class="flex items-center justify-between p-2 rounded hover:bg-dark-700 text-gray-400 hover:text-white transition"><div class="flex items-center"><i class="fa-solid fa-table-tennis-paddle-ball w-6 text-center mr-2"></i> Tenis</div><span class="text-xs bg-dark-900 px-2 py-1 rounded">89</span></a></li>
+                            <li><a href="#" class="flex items-center justify-between p-2 rounded hover:bg-dark-700 text-gray-400 hover:text-white transition"><div class="flex items-center"><i class="fa-solid fa-volleyball w-6 text-center mr-2"></i> Bola Voli</div><span class="text-xs bg-dark-900 px-2 py-1 rounded">45</span></a></li>
+                            <li><a href="#" class="flex items-center justify-between p-2 rounded hover:bg-dark-700 text-gray-400 hover:text-white transition"><div class="flex items-center"><i class="fa-solid fa-gamepad w-6 text-center mr-2"></i> E-Sports</div><span class="text-xs bg-dark-900 px-2 py-1 rounded">320</span></a></li>
+                        </ul>
+                    </div>
+                </aside>
+
+                <!-- Kanan: Pertandingan (Odds) -->
+                <div class="w-full lg:w-3/4">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-xl font-bold text-white flex items-center">
+                            <i class="fa-solid fa-fire text-red-500 mr-2"></i> Pertandingan Populer
+                        </h2>
+                        <div class="text-sm space-x-2">
+                            <span class="bg-brand text-dark-900 px-3 py-1 rounded font-bold cursor-pointer">Hari Ini</span>
+                            <span class="text-gray-400 hover:text-white cursor-pointer px-2">Besok</span>
+                        </div>
+                    </div>
+
+                    <!-- List Pertandingan (Card) -->
+                    <div class="space-y-4">
+                        
+                        <!-- Match 1: Sepak Bola -->
+                        <div class="bg-dark-800 rounded-xl border border-gray-700 p-4 hover:border-gray-500 transition-colors">
+                            <div class="flex justify-between items-center text-xs text-gray-400 mb-3 pb-2 border-b border-gray-700">
+                                <span><i class="fa-regular fa-futbol text-brand mr-1"></i> English Premier League • <span class="text-red-400 animate-pulse font-bold">LIVE 45'</span></span>
+                                <span>Lebih banyak taruhan <i class="fa-solid fa-chevron-right ml-1 text-[10px]"></i></span>
+                            </div>
+                            
+                            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                                <!-- Tim -->
+                                <div class="w-full md:w-5/12 space-y-2">
+                                    <div class="flex justify-between items-center text-white font-semibold">
+                                        <span>Manchester United</span>
+                                        <span class="text-brand text-lg font-bold">1</span>
+                                    </div>
+                                    <div class="flex justify-between items-center text-white font-semibold">
+                                        <span>Arsenal</span>
+                                        <span class="text-brand text-lg font-bold">0</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Tombol Odds (1 X 2) -->
+                                <div class="w-full md:w-7/12 flex gap-2">
+                                    <!-- 1 (Home) -->
+                                    <button class="flex-1 flex flex-col items-center bg-dark-700 hover:bg-brand hover:text-dark-900 border border-gray-600 hover:border-brand rounded py-2 transition group">
+                                        <span class="text-xs text-gray-400 group-hover:text-dark-900/70 mb-1">1</span>
+                                        <span class="font-bold text-white group-hover:text-dark-900 text-lg">1.85</span>
+                                    </button>
+                                    <!-- X (Draw) -->
+                                    <button class="flex-1 flex flex-col items-center bg-dark-700 hover:bg-brand hover:text-dark-900 border border-gray-600 hover:border-brand rounded py-2 transition group">
+                                        <span class="text-xs text-gray-400 group-hover:text-dark-900/70 mb-1">X</span>
+                                        <span class="font-bold text-white group-hover:text-dark-900 text-lg">3.40</span>
+                                    </button>
+                                    <!-- 2 (Away) -->
+                                    <button class="flex-1 flex flex-col items-center bg-dark-700 hover:bg-brand hover:text-dark-900 border border-gray-600 hover:border-brand rounded py-2 transition group">
+                                        <span class="text-xs text-gray-400 group-hover:text-dark-900/70 mb-1">2</span>
+                                        <span class="font-bold text-white group-hover:text-dark-900 text-lg text-red-400 group-hover:text-red-700">4.15</span> <!-- Indikator odds turun -->
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Match 2: Sepak Bola -->
+                        <div class="bg-dark-800 rounded-xl border border-gray-700 p-4 hover:border-gray-500 transition-colors">
+                            <div class="flex justify-between items-center text-xs text-gray-400 mb-3 pb-2 border-b border-gray-700">
+                                <span><i class="fa-regular fa-futbol text-brand mr-1"></i> UEFA Champions League • 21:00</span>
+                                <span>+142 taruhan <i class="fa-solid fa-chevron-right ml-1 text-[10px]"></i></span>
+                            </div>
+                            
+                            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                                <div class="w-full md:w-5/12 space-y-2">
+                                    <div class="flex justify-between items-center text-white font-semibold"><span>Real Madrid</span><span>-</span></div>
+                                    <div class="flex justify-between items-center text-white font-semibold"><span>Bayern Munich</span><span>-</span></div>
+                                </div>
+                                <div class="w-full md:w-7/12 flex gap-2">
+                                    <button class="flex-1 flex flex-col items-center bg-dark-700 hover:bg-brand hover:text-dark-900 border border-gray-600 hover:border-brand rounded py-2 transition group">
+                                        <span class="text-xs text-gray-400 group-hover:text-dark-900/70 mb-1">1</span>
+                                        <span class="font-bold text-white group-hover:text-dark-900 text-lg">2.10</span>
+                                    </button>
+                                    <button class="flex-1 flex flex-col items-center bg-dark-700 hover:bg-brand hover:text-dark-900 border border-gray-600 hover:border-brand rounded py-2 transition group">
+                                        <span class="text-xs text-gray-400 group-hover:text-dark-900/70 mb-1">X</span>
+                                        <span class="font-bold text-white group-hover:text-dark-900 text-lg text-green-400 group-hover:text-green-700">3.25</span>
+                                    </button>
+                                    <button class="flex-1 flex flex-col items-center bg-dark-700 hover:bg-brand hover:text-dark-900 border border-gray-600 hover:border-brand rounded py-2 transition group">
+                                        <span class="text-xs text-gray-400 group-hover:text-dark-900/70 mb-1">2</span>
+                                        <span class="font-bold text-white group-hover:text-dark-900 text-lg">3.60</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Match 3: Bola Basket -->
+                        <div class="bg-dark-800 rounded-xl border border-gray-700 p-4 hover:border-gray-500 transition-colors">
+                            <div class="flex justify-between items-center text-xs text-gray-400 mb-3 pb-2 border-b border-gray-700">
+                                <span><i class="fa-solid fa-basketball text-orange-500 mr-1"></i> NBA • Besok, 08:30</span>
+                                <span>+85 taruhan <i class="fa-solid fa-chevron-right ml-1 text-[10px]"></i></span>
+                            </div>
+                            
+                            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                                <div class="w-full md:w-5/12 space-y-2">
+                                    <div class="flex justify-between items-center text-white font-semibold"><span>Los Angeles Lakers</span><span>-</span></div>
+                                    <div class="flex justify-between items-center text-white font-semibold"><span>Golden State Warriors</span><span>-</span></div>
+                                </div>
+                                <!-- Basket biasanya cuma 2 outcome utama (Moneyline) -->
+                                <div class="w-full md:w-7/12 flex gap-2">
+                                    <button class="flex-1 flex flex-col items-center bg-dark-700 hover:bg-brand hover:text-dark-900 border border-gray-600 hover:border-brand rounded py-2 transition group">
+                                        <span class="text-xs text-gray-400 group-hover:text-dark-900/70 mb-1">1</span>
+                                        <span class="font-bold text-white group-hover:text-dark-900 text-lg">1.95</span>
+                                    </button>
+                                    <div class="flex-1 flex items-center justify-center bg-dark-900 border border-dark-700 rounded text-gray-600 text-sm opacity-50 cursor-not-allowed">
+                                        N/A
+                                    </div>
+                                    <button class="flex-1 flex flex-col items-center bg-dark-700 hover:bg-brand hover:text-dark-900 border border-gray-600 hover:border-brand rounded py-2 transition group">
+                                        <span class="text-xs text-gray-400 group-hover:text-dark-900/70 mb-1">2</span>
+                                        <span class="font-bold text-white group-hover:text-dark-900 text-lg">1.88</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ========================================== -->
+        <!-- HALAMAN 2: LIVE SPORTS (PLACEHOLDER)       -->
+        <!-- ========================================== -->
+        <section id="page-live" class="page-content hidden h-full flex flex-col items-center justify-center py-24 text-center">
+            <i class="fa-solid fa-stopwatch text-6xl text-brand mb-6 opacity-80"></i>
+            <h2 class="text-4xl font-extrabold text-white mb-4">Halaman <span class="text-brand">Live Sports</span></h2>
+            <p class="text-xl text-gray-400 border border-gray-700 bg-dark-800 px-6 py-3 rounded-full">
+                🚧 Segera Hadir 🚧
+            </p>
+            <p class="mt-4 text-gray-500 max-w-md">Fitur streaming langsung dan taruhan in-play sedang dalam tahap pengembangan. Pantau terus update kami!</p>
+        </section>
+
+
+        <!-- ========================================== -->
+        <!-- HALAMAN 3: E-SPORTS (PLACEHOLDER)          -->
+        <!-- ========================================== -->
+        <section id="page-esports" class="page-content hidden h-full flex flex-col items-center justify-center py-24 text-center">
+            <i class="fa-solid fa-headset text-6xl text-purple-500 mb-6 opacity-80"></i>
+            <h2 class="text-4xl font-extrabold text-white mb-4">Halaman <span class="text-purple-500">E-Sports</span></h2>
+            <p class="text-xl text-gray-400 border border-gray-700 bg-dark-800 px-6 py-3 rounded-full">
+                🚧 Segera Hadir 🚧
+            </p>
+            <p class="mt-4 text-gray-500 max-w-md">Bersiaplah untuk bertaruh di turnamen Dota 2, CS:GO, dan Valorant terbesar.</p>
+        </section>
+
+
+        <!-- ========================================== -->
+        <!-- HALAMAN 4: PROMOSI (PLACEHOLDER)           -->
+        <!-- ========================================== -->
+        <section id="page-promosi" class="page-content hidden h-full flex flex-col items-center justify-center py-24 text-center">
+            <i class="fa-solid fa-gift text-6xl text-yellow-500 mb-6 opacity-80 animate-bounce"></i>
+            <h2 class="text-4xl font-extrabold text-white mb-4">Halaman <span class="text-yellow-500">Promosi</span></h2>
+            <p class="text-xl text-gray-400 border border-gray-700 bg-dark-800 px-6 py-3 rounded-full">
+                🚧 Segera Hadir 🚧
+            </p>
+            <p class="mt-4 text-gray-500 max-w-md">Kumpulan bonus deposit, cashback, dan event khusus akan tersedia di sini.</p>
+        </section>
+
+
+        <!-- ========================================== -->
+        <!-- HALAMAN 5: AKUN (PLACEHOLDER)              -->
+        <!-- ========================================== -->
+        <section id="page-akun" class="page-content hidden h-full flex flex-col items-center justify-center py-24 text-center">
+            <i class="fa-solid fa-user-shield text-6xl text-blue-500 mb-6 opacity-80"></i>
+            <h2 class="text-4xl font-extrabold text-white mb-4">Halaman <span class="text-blue-500">Akun Profil</span></h2>
+            <p class="text-xl text-gray-400 border border-gray-700 bg-dark-800 px-6 py-3 rounded-full">
+                🚧 Segera Hadir 🚧
+            </p>
+            <p class="mt-4 text-gray-500 max-w-md">Pengaturan profil, riwayat taruhan, laporan transaksi, dan sistem deposit/withdraw.</p>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark-800 border-t border-gray-700 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center mb-4 md:mb-0">
+                    <i class="fa-solid fa-bolt text-brand text-xl mr-2"></i>
+                    <span class="font-extrabold text-xl text-white tracking-wider">HOUSE<span class="text-brand">BET</span></span>
+                </div>
+                <div class="text-gray-500 text-sm text-center md:text-right">
+                    &copy; 2026 Housebet Prototype. Semua hak cipta dilindungi.<br>
+                    <span class="text-xs">Berjudi pada usia 18+ ke atas. Bermain dengan tanggung jawab.</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript untuk Sistem SPA (Single Page Application) -->
+    <script>
+        // Fungsi untuk mengganti halaman yang ditampilkan
+        function showPage(pageId) {
+            // 1. Sembunyikan semua konten halaman
+            const pages = document.querySelectorAll('.page-content');
+            pages.forEach(page => {
+                page.classList.add('hidden');
+                page.classList.remove('block');
+            });
+
+            // 2. Tampilkan halaman yang dituju
+            const targetPage = document.getElementById('page-' + pageId);
+            if (targetPage) {
+                targetPage.classList.remove('hidden');
+                targetPage.classList.add('block');
+            }
+
+            // 3. Update styling pada tombol navigasi (Desktop)
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                // Reset semua ke gaya default non-aktif
+                link.classList.remove('text-brand', 'border-brand');
+                link.classList.add('text-gray-400', 'border-transparent');
+            });
+
+            // Set gaya aktif ke tombol yang diklik
+            const activeNav = document.getElementById('nav-' + pageId);
+            if (activeNav) {
+                activeNav.classList.remove('text-gray-400', 'border-transparent');
+                activeNav.classList.add('text-brand', 'border-brand');
+            }
+            
+            // Scroll otomatis ke atas
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Toggle Mobile Menu
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+
+        function toggleMobileMenu() {
+            if (mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.remove('hidden');
+            } else {
+                mobileMenu.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
